@@ -1,31 +1,44 @@
-import math
-def encrypt(key, message):
- ciphertext = [''] * key
- for column in range(key):
-     index = column
-     while index < len(message):
-         ciphertext[column] += message[index]
-         index += key
- return ''.join(ciphertext)
+def encrypt(message, key):
+    # Calculate the number of columns needed
+    num_columns = len(key)
+    # Pad the message with spaces to make its length a multiple of the number of columns
+    padded_message = message + ' ' * (num_columns - (len(message) % num_columns))
+    
+    # Create a list of columns
+    columns = [padded_message[i::num_columns] for i in range(num_columns)]
+    
+    # Arrange columns according to the key
+    sorted_columns = [column for _, column in sorted(zip(key, columns))]
+    
+    # Concatenate the columns to get the encrypted message
+    encrypted_message = ''.join(sorted_columns)
+    
+    return encrypted_message
 
-def decrypt(key, message):
- nrows = key
- ncols = math.ceil(len(message) / key)
- empty_positions = nrows * ncols - len(message)
- plaintext = [''] * ncols
- column = 0
- row = 0
- for symbol in message:
-     plaintext[column] += symbol
-     column += 1
-     if column == ncols or (column == ncols - 1 and row >= nrows - empty_positions):
-         column = 0
-         row += 1
- return ''.join(plaintext)
+def decrypt(encrypted_message, key):
+    # Calculate the number of columns needed
+    num_columns = len(key)
+    
+    # Calculate the number of rows needed
+    num_rows = len(encrypted_message) // num_columns
+    
+    # Create a list of columns
+    columns = [encrypted_message[i*num_rows:(i+1)*num_rows] for i in range(num_columns)]
+    
+    # Arrange columns according to the key
+    sorted_columns = [column for _, column in sorted(zip(key, columns))]
+    
+    # Concatenate the columns to get the decrypted message
+    decrypted_message = ''.join([''.join(row) for row in zip(*sorted_columns)])
+    
+    return decrypted_message
 
-message = input("Enter the message: ")
-key = int(input("Enter the key: "))
-ciphertext = encrypt(key, message)
-print(f'Ciphertext: {ciphertext}<end>')
-plaintext = decrypt(key, ciphertext)
-print(f'Plaintext: {plaintext}')
+# Example usage:
+message = "HELLOWORLD"
+key = [3, 1, 4, 2]
+encrypted_message = encrypt(message, key)
+decrypted_message = decrypt(encrypted_message, key)
+
+print("Original Message:", message)
+print("Encrypted Message:", encrypted_message)
+print("Decrypted Message:", decrypted_message)
